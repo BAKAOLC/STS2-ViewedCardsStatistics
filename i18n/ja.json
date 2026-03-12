@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "見た回数",
+  "SEEN_LABEL": "見た",
+  "PICKED_LABEL": "取得",
+  "FIRST_LOAD_TITLE": "履歴をインポートしますか？",
+  "FIRST_LOAD_DESCRIPTION": "「見たカード統計」MODを初めてロードしています。\n\n既存のラン履歴を分析して統計データをインポートしますか？\n\nランの数によっては時間がかかる場合があります。",
+  "FIRST_LOAD_YES": "はい、インポート",
+  "FIRST_LOAD_NO": "いいえ、新規開始"
+}

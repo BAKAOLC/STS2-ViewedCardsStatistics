@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "본 횟수",
+  "SEEN_LABEL": "본",
+  "PICKED_LABEL": "획득",
+  "FIRST_LOAD_TITLE": "기록 가져오기?",
+  "FIRST_LOAD_DESCRIPTION": "「본 카드 통계」 모드를 처음 로드합니다.\n\n기존 런 기록을 분석하여 통계 데이터를 가져오시겠습니까?\n\n런 수에 따라 시간이 걸릴 수 있습니다.",
+  "FIRST_LOAD_YES": "예, 가져오기",
+  "FIRST_LOAD_NO": "아니오, 새로 시작"
+}

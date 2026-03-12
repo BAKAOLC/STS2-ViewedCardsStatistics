@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Viewed",
+  "SEEN_LABEL": "Seen",
+  "PICKED_LABEL": "Picked",
+  "FIRST_LOAD_TITLE": "Import Run History?",
+  "FIRST_LOAD_DESCRIPTION": "This is the first time loading Viewed Cards Statistics mod.\n\nWould you like to analyze your existing run history to import statistics data?\n\nThis may take a moment depending on how many runs you have.",
+  "FIRST_LOAD_YES": "Yes, Import",
+  "FIRST_LOAD_NO": "No, Start Fresh"
+}

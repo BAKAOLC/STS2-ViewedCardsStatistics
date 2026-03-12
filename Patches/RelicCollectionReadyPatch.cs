@@ -1,0 +1,61 @@
+using Godot;
+using MegaCrit.Sts2.Core.Entities.UI;
+using MegaCrit.Sts2.Core.Nodes.Screens.RelicCollection;
+using STS2ViewedCardsStatistics.Data;
+using STS2ViewedCardsStatistics.Patching.Models;
+
+namespace STS2ViewedCardsStatistics.Patches
+{
+    /// <summary>
+    ///     Add stats label to relic collection entry on ready
+    /// </summary>
+    public class RelicCollectionReadyPatch : IPatchMethod
+    {
+        public static string PatchId => "relic_collection_ready";
+        public static string Description => "Add stats label to relic collection entry";
+
+        public static ModPatchTarget[] GetTargets()
+        {
+            return
+            [
+                new(typeof(NRelicCollectionEntry), "_Ready", []),
+            ];
+        }
+
+        // ReSharper disable once InconsistentNaming
+        public static void Postfix(NRelicCollectionEntry __instance)
+        {
+            try
+            {
+                if (!StatisticsManager.Instance.IsInitialized) return;
+                if (__instance.ModelVisibility != ModelVisibility.Visible) return;
+
+                var relic = __instance.relic;
+                if (relic == null) return;
+
+                var (seenTotal, _, pickedTotal, _) = StatisticsManager.Instance.GetRelicTotalCounts(relic.Id);
+                if (seenTotal <= 0 && pickedTotal <= 0) return;
+
+                var text = $"{pickedTotal}/{seenTotal}";
+
+                var label = new Label
+                {
+                    Name = "ViewedStatsLabel",
+                    Text = text,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+                label.AddThemeColorOverride("font_color", new(0.7f, 0.7f, 0.7f));
+                label.AddThemeFontSizeOverride("font_size", 12);
+                label.Position = new(-10, 70);
+                label.Size = new(88, 20);
+
+                __instance.AddChild(label);
+            }
+            catch (Exception ex)
+            {
+                Main.Logger.Warn($"Failed to add relic stats label: {ex.Message}");
+            }
+        }
+    }
+}

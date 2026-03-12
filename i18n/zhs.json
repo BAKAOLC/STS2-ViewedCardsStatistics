@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "见过",
+  "SEEN_LABEL": "见过",
+  "PICKED_LABEL": "拾取",
+  "FIRST_LOAD_TITLE": "导入历史记录？",
+  "FIRST_LOAD_DESCRIPTION": "这是首次加载「见过的卡牌统计」模组。\n\n是否要分析现有的历史记录来导入统计数据？\n\n这可能需要一些时间，取决于你有多少局游戏记录。",
+  "FIRST_LOAD_YES": "是，导入",
+  "FIRST_LOAD_NO": "否，从头开始"
+}
