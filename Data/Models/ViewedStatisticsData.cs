@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using MegaCrit.Sts2.Core.Models;
 
-namespace STS2ViewedCardsStatistics.Data
+namespace STS2ViewedCardsStatistics.Data.Models
 {
     /// <summary>
     ///     Main data structure for statistics

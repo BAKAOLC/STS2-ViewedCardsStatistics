@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Gesehen",
+  "SEEN_LABEL": "Gesehen",
+  "PICKED_LABEL": "Gewählt",
+  "FIRST_LOAD_TITLE": "Spielverlauf importieren?",
+  "FIRST_LOAD_DESCRIPTION": "Dies ist das erste Mal, dass der Mod \"Gesehene Karten Statistik\" geladen wird.\n\nMöchten Sie Ihren bestehenden Spielverlauf analysieren, um Statistikdaten zu importieren?\n\nDies kann je nach Anzahl Ihrer Durchläufe einen Moment dauern.",
+  "FIRST_LOAD_YES": "Ja, importieren",
+  "FIRST_LOAD_NO": "Nein, neu beginnen"
+}

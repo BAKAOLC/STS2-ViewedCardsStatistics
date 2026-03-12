@@ -41,20 +41,20 @@ namespace STS2ViewedCardsStatistics.Console
         {
             if (args.Length < 2)
             {
-                StatisticsManager.Instance.VerboseImportLogging = !StatisticsManager.Instance.VerboseImportLogging;
-                var status = StatisticsManager.Instance.VerboseImportLogging ? "on" : "off";
+                StatisticsManager.VerboseImportLogging = !StatisticsManager.VerboseImportLogging;
+                var status = StatisticsManager.VerboseImportLogging ? "on" : "off";
                 return new(true, $"Verbose logging toggled to: {status}");
             }
 
             var value = args[1].ToLowerInvariant();
-            StatisticsManager.Instance.VerboseImportLogging = value is "on" or "true" or "1";
-            var newStatus = StatisticsManager.Instance.VerboseImportLogging ? "on" : "off";
+            StatisticsManager.VerboseImportLogging = value is "on" or "true" or "1";
+            var newStatus = StatisticsManager.VerboseImportLogging ? "on" : "off";
             return new(true, $"Verbose logging set to: {newStatus}");
         }
 
         private static CmdResult ProcessClear()
         {
-            StatisticsManager.Instance.CreateEmptyData();
+            StatisticsManager.CreateEmptyData();
             return new(true, "Statistics data cleared");
         }
 

@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Viste",
+  "SEEN_LABEL": "Viste",
+  "PICKED_LABEL": "Scelte",
+  "FIRST_LOAD_TITLE": "Importare cronologia?",
+  "FIRST_LOAD_DESCRIPTION": "Questa è la prima volta che viene caricato il mod «Statistiche carte viste».\n\nVuoi analizzare la cronologia delle partite esistenti per importare i dati statistici?\n\nQuesto potrebbe richiedere un momento a seconda di quante partite hai.",
+  "FIRST_LOAD_YES": "Sì, importa",
+  "FIRST_LOAD_NO": "No, ricomincia"
+}

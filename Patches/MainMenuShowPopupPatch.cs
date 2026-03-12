@@ -3,6 +3,7 @@ using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
 using STS2ViewedCardsStatistics.Data;
 using STS2ViewedCardsStatistics.Patching.Models;
 using STS2ViewedCardsStatistics.UI;
+using STS2ViewedCardsStatistics.Utils.Persistence;
 
 namespace STS2ViewedCardsStatistics.Patches
 {
@@ -11,7 +12,8 @@ namespace STS2ViewedCardsStatistics.Patches
     /// </summary>
     public class MainMenuShowPopupPatch : IPatchMethod
     {
-        private static bool _hasShownPopup;
+        private static bool _initialized;
+        private static NMainMenu? _currentMainMenu;
 
         public static string PatchId => "main_menu_show_popup";
         public static string Description => "Show first load popup when entering main menu";
@@ -27,20 +29,38 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                if (_hasShownPopup) return;
-                _hasShownPopup = true;
+                _currentMainMenu = __instance;
 
-                if (!StatisticsManager.Instance.IsInitialized)
-                    StatisticsManager.Instance.Initialize();
+                if (!_initialized)
+                {
+                    _initialized = true;
 
-                if (!StatisticsManager.Instance.HasExistingData)
-                    __instance.ToSignal(__instance.GetTree(), SceneTree.SignalName.ProcessFrame)
-                        .OnCompleted(FirstLoadPopup.ShowPopup);
+                    if (!StatisticsManager.IsInitialized)
+                        StatisticsManager.Initialize();
+
+                    ProfileManager.Instance.ProfileChanged += OnProfileChanged;
+                }
+
+                TryShowPopupIfNeeded(__instance);
             }
             catch (Exception ex)
             {
                 Main.Logger.Warn($"Failed to show first load popup: {ex.Message}");
             }
+        }
+
+        private static void OnProfileChanged(int oldProfileId, int newProfileId)
+        {
+            if (_currentMainMenu != null && GodotObject.IsInstanceValid(_currentMainMenu))
+                TryShowPopupIfNeeded(_currentMainMenu);
+        }
+
+        private static void TryShowPopupIfNeeded(NMainMenu mainMenu)
+        {
+            if (StatisticsManager.HasExistingData) return;
+
+            mainMenu.ToSignal(mainMenu.GetTree(), SceneTree.SignalName.ProcessFrame)
+                .OnCompleted(FirstLoadPopup.ShowPopup);
         }
     }
 }

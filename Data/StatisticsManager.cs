@@ -4,64 +4,51 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Runs.History;
 using MegaCrit.Sts2.Core.Saves;
-using STS2ViewedCardsStatistics.Utils;
+using STS2ViewedCardsStatistics.Data.Models;
 
 namespace STS2ViewedCardsStatistics.Data
 {
     /// <summary>
-    ///     Statistics data manager
+    ///     Statistics data manager - facade for ModDataStore statistics operations
     /// </summary>
     public class StatisticsManager
     {
         private static StatisticsManager? _instance;
 
-        private Setting<ViewedStatisticsData>? _dataSettings;
-        private Setting<ModSettings>? _modSettings;
-
         private StatisticsManager()
         {
         }
 
-        public bool VerboseImportLogging
+        public static bool VerboseImportLogging
         {
-            get => _modSettings?.Data.VerboseImportLogging ?? false;
+            get => ModDataStore.Instance.Get<ModSettings>(ModDataStore.SettingsKey).VerboseImportLogging;
             set
             {
-                if (_modSettings == null) return;
-                _modSettings.Data.VerboseImportLogging = value;
-                _modSettings.Save();
+                ModDataStore.Instance.Modify<ModSettings>(ModDataStore.SettingsKey,
+                    s => s.VerboseImportLogging = value);
+                ModDataStore.Instance.Save(ModDataStore.SettingsKey);
             }
         }
 
         public static StatisticsManager Instance => _instance ??= new();
-        public ViewedStatisticsData Data => _dataSettings?.Data ?? new ViewedStatisticsData();
 
-        public bool IsInitialized => _dataSettings != null;
-        public bool HasExistingData { get; private set; }
+        public static ViewedStatisticsData Data =>
+            ModDataStore.Instance.Get<ViewedStatisticsData>(ModDataStore.StatisticsKey);
 
-        public void Initialize()
+        public static bool IsInitialized => ModDataStore.Instance.IsInitialized;
+        public static bool HasExistingData => ModDataStore.Instance.HasExistingData(ModDataStore.StatisticsKey);
+
+        public static void Initialize()
         {
-            _modSettings = new(Const.SettingsFilePath, new(), "ModSettings");
-            _modSettings.Load();
-
-            HasExistingData = FileOperations.FileExists(Const.DataFilePath);
-
-            _dataSettings = new(Const.DataFilePath, new(), "StatisticsManager");
-
-            if (HasExistingData)
-            {
-                _dataSettings.Load();
-                MigrateDataIfNeeded();
-            }
-
+            ModDataStore.Instance.Initialize();
+            MigrateDataIfNeeded();
             Main.Logger.Info($"StatisticsManager initialized. HasExistingData: {HasExistingData}");
         }
 
-        public void CreateEmptyData()
+        public static void CreateEmptyData()
         {
-            Data.Clear();
+            ModDataStore.Instance.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
             Save();
-            HasExistingData = true;
             Main.Logger.Info("Created empty statistics data");
         }
 
@@ -87,14 +74,13 @@ namespace STS2ViewedCardsStatistics.Data
                 }
 
             Save();
-            HasExistingData = true;
             Main.Logger.Info($"Imported data from {importedRuns} run histories");
         }
 
         public void ClearAndReimportFromRunHistory()
         {
             Main.Logger.Info("Clearing existing data and reimporting from run history...");
-            Data.Clear();
+            ModDataStore.Instance.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
             ImportFromRunHistory();
         }
 
@@ -107,7 +93,7 @@ namespace STS2ViewedCardsStatistics.Data
             Save();
         }
 
-        private void ProcessRunHistory(RunHistory history, string fileName = "", bool skipDuplicateCheck = false)
+        private static void ProcessRunHistory(RunHistory history, string fileName = "", bool skipDuplicateCheck = false)
         {
             if (history.Players.Count == 0)
             {
@@ -177,21 +163,19 @@ namespace STS2ViewedCardsStatistics.Data
             Data.ProcessedRuns.Add(runId);
         }
 
-        private void ProcessMapPointHistory(MapPointHistoryEntry mapPoint, ulong playerId, ModelId characterId,
+        private static void ProcessMapPointHistory(MapPointHistoryEntry mapPoint, ulong playerId, ModelId characterId,
             int actIndex = 0, int mapPointIndex = 0)
         {
             var playerEntry = mapPoint.PlayerStats.FirstOrDefault(entry => entry.PlayerId == playerId);
 
             if (playerEntry == null)
             {
-                if (VerboseImportLogging)
-                {
-                    var typeDisplay = mapPoint.MapPointType.ToString();
-                    if (mapPoint.MapPointType == MapPointType.Unknown && mapPoint.Rooms.Count > 0)
-                        typeDisplay = $"{mapPoint.MapPointType}({mapPoint.Rooms[0].RoomType})";
-                    Main.Logger.Info(
-                        $"    [Act {actIndex}, Point {mapPointIndex}] {typeDisplay}: No player entry for ID {playerId}");
-                }
+                if (!VerboseImportLogging) return;
+                var typeDisplay = mapPoint.MapPointType.ToString();
+                if (mapPoint is { MapPointType: MapPointType.Unknown, Rooms.Count: > 0 })
+                    typeDisplay = $"{mapPoint.MapPointType}({mapPoint.Rooms[0].RoomType})";
+                Main.Logger.Info(
+                    $"    [Act {actIndex}, Point {mapPointIndex}] {typeDisplay}: No player entry for ID {playerId}");
 
                 return;
             }
@@ -470,43 +454,12 @@ namespace STS2ViewedCardsStatistics.Data
                 Main.Logger.Info(logDetails.ToString().TrimEnd());
         }
 
-        public void RecordCardSeen(ModelId characterId, ModelId cardId, bool picked = false)
+        public static void Save()
         {
-            if (!IsInitialized || characterId == ModelId.none || cardId == ModelId.none) return;
-            var stats = Data.GetOrCreateCardStats(characterId);
-            stats.RecordSeen(cardId);
-            if (picked) stats.RecordPicked(cardId);
+            ModDataStore.Instance.Save(ModDataStore.StatisticsKey);
         }
 
-        public void RecordRelicSeen(ModelId characterId, ModelId relicId, bool picked = false)
-        {
-            if (!IsInitialized || characterId == ModelId.none || relicId == ModelId.none) return;
-            var stats = Data.GetOrCreateRelicStats(characterId);
-            stats.RecordSeen(relicId);
-            if (picked) stats.RecordPicked(relicId);
-        }
-
-        public void RecordPotionSeen(ModelId characterId, ModelId potionId, bool picked = false)
-        {
-            if (!IsInitialized || characterId == ModelId.none || potionId == ModelId.none) return;
-            var stats = Data.GetOrCreatePotionStats(characterId);
-            stats.RecordSeen(potionId);
-            if (picked) stats.RecordPicked(potionId);
-        }
-
-        public void RecordMonsterSeen(ModelId characterId, ModelId monsterId)
-        {
-            if (!IsInitialized || characterId == ModelId.none || monsterId == ModelId.none) return;
-            var stats = Data.GetOrCreateMonsterStats(characterId);
-            stats.RecordSeen(monsterId);
-        }
-
-        public void Save()
-        {
-            _dataSettings?.Save();
-        }
-
-        private void MigrateDataIfNeeded()
+        private static void MigrateDataIfNeeded()
         {
             if (Data.DataVersion >= ViewedStatisticsData.CurrentDataVersion) return;
             Main.Logger.Info(

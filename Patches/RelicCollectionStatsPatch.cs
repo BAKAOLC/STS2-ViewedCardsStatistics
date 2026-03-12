@@ -26,7 +26,7 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                if (!StatisticsManager.Instance.IsInitialized) return;
+                if (!StatisticsManager.IsInitialized) return;
                 if (__instance.ModelVisibility != ModelVisibility.Visible) return;
 
                 var relic = __instance.relic;

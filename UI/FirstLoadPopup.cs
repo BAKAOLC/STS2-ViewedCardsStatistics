@@ -35,7 +35,7 @@ namespace STS2ViewedCardsStatistics.UI
             catch (Exception ex)
             {
                 Main.Logger.Error($"Failed to show FirstLoadPopup: {ex.Message}");
-                StatisticsManager.Instance.CreateEmptyData();
+                StatisticsManager.CreateEmptyData();
             }
         }
 
@@ -75,7 +75,7 @@ namespace STS2ViewedCardsStatistics.UI
         private static void OnNoPressed(NClickableControl _)
         {
             Main.Logger.Info("User chose to start fresh");
-            StatisticsManager.Instance.CreateEmptyData();
+            StatisticsManager.CreateEmptyData();
             NModalContainer.Instance?.Clear();
         }
     }

@@ -28,7 +28,7 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                if (!StatisticsManager.Instance.IsInitialized) return;
+                if (!StatisticsManager.IsInitialized) return;
 
                 var libraryGrid = FindParentOfType<NCardLibraryGrid>(__instance);
                 if (libraryGrid is not { ShowStats: true }) return;

@@ -26,7 +26,7 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                if (!StatisticsManager.Instance.IsInitialized) return;
+                if (!StatisticsManager.IsInitialized) return;
                 if (__instance._visibility != ModelVisibility.Visible) return;
                 if (__instance._model == null) return;
 

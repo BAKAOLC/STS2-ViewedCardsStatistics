@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Görüldü",
+  "SEEN_LABEL": "Görüldü",
+  "PICKED_LABEL": "Seçildi",
+  "FIRST_LOAD_TITLE": "Geçmiş içe aktarılsın mı?",
+  "FIRST_LOAD_DESCRIPTION": "«Görülen Kart İstatistikleri» modu ilk kez yükleniyor.\n\nMevcut oyun geçmişinizi analiz ederek istatistik verilerini içe aktarmak ister misiniz?\n\nKaç oyununuz olduğuna bağlı olarak bu biraz zaman alabilir.",
+  "FIRST_LOAD_YES": "Evet, içe aktar",
+  "FIRST_LOAD_NO": "Hayır, sıfırdan başla"
+}

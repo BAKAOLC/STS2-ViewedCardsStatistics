@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace STS2ViewedCardsStatistics.Data
+namespace STS2ViewedCardsStatistics.Data.Models
 {
     public class ModSettings
     {

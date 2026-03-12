@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Vues",
+  "SEEN_LABEL": "Vues",
+  "PICKED_LABEL": "Choisies",
+  "FIRST_LOAD_TITLE": "Importer l'historique ?",
+  "FIRST_LOAD_DESCRIPTION": "C'est la première fois que le mod « Statistiques des cartes vues » est chargé.\n\nVoulez-vous analyser votre historique de parties existant pour importer les données statistiques ?\n\nCela peut prendre un moment selon le nombre de parties.",
+  "FIRST_LOAD_YES": "Oui, importer",
+  "FIRST_LOAD_NO": "Non, recommencer"
+}

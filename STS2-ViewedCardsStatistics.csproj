@@ -30,7 +30,6 @@
 
     <ItemGroup>
         <Content Include="mod_manifest.json"/>
-        <EmbeddedResource Include="i18n/*.json"/>
     </ItemGroup>
 
     <!-- Exclude game source reference folder from compilation -->

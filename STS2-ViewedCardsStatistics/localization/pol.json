@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Widziane",
+  "SEEN_LABEL": "Widziane",
+  "PICKED_LABEL": "Wybrane",
+  "FIRST_LOAD_TITLE": "Zaimportować historię?",
+  "FIRST_LOAD_DESCRIPTION": "To pierwszy raz, gdy mod \"Statystyki widzianych kart\" jest ładowany.\n\nCzy chcesz przeanalizować istniejącą historię rozgrywek, aby zaimportować dane statystyczne?\n\nMoże to chwilę potrwać w zależności od liczby rozgrywek.",
+  "FIRST_LOAD_YES": "Tak, importuj",
+  "FIRST_LOAD_NO": "Nie, zacznij od nowa"
+}

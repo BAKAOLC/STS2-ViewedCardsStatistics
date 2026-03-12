@@ -1,0 +1,9 @@
+{
+  "VIEWED_STATS_LABEL": "Vistas",
+  "SEEN_LABEL": "Vistas",
+  "PICKED_LABEL": "Escolhidas",
+  "FIRST_LOAD_TITLE": "Importar histórico?",
+  "FIRST_LOAD_DESCRIPTION": "Esta é a primeira vez que o mod «Estatísticas de cartas vistas» está sendo carregado.\n\nDeseja analisar seu histórico de partidas existente para importar dados estatísticos?\n\nIsso pode levar um momento dependendo de quantas partidas você tem.",
+  "FIRST_LOAD_YES": "Sim, importar",
+  "FIRST_LOAD_NO": "Não, começar do zero"
+}

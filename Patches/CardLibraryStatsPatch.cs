@@ -26,7 +26,7 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                if (!StatisticsManager.Instance.IsInitialized) return;
+                if (!StatisticsManager.IsInitialized) return;
 
                 var (seenTotal, seenGrandTotal, pickedTotal, pickedGrandTotal) =
                     StatisticsManager.Instance.GetCardTotalCounts(card.Id);

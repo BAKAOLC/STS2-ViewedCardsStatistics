@@ -4,6 +4,7 @@ using STS2ViewedCardsStatistics.Data;
 using STS2ViewedCardsStatistics.Patches;
 using STS2ViewedCardsStatistics.Patching.Core;
 using STS2ViewedCardsStatistics.Utils;
+using STS2ViewedCardsStatistics.Utils.Persistence.Patches;
 
 namespace STS2ViewedCardsStatistics
 {
@@ -26,15 +27,19 @@ namespace STS2ViewedCardsStatistics
             {
                 I18N = new(
                     "ViewedCardsStatistics.I18N",
-                    ["STS2ViewedCardsStatistics.i18n"]
+                    [$"user://mod-configs/{Const.ModId}/localization"],
+                    pckFolders: ["STS2-ViewedCardsStatistics/localization"]
                 );
 
-                StatisticsManager.Instance.Initialize();
+                StatisticsManager.Initialize();
+
+                var frameworkPatcher = GetOrCreatePatcher("framework", "Framework-level patches");
+                RegisterFrameworkPatches(frameworkPatcher);
 
                 var mainPatcher = GetOrCreatePatcher("main", "Main patches");
                 RegisterMainPatches(mainPatcher);
-                var allSuccess = ApplyAllPatchers();
 
+                var allSuccess = ApplyAllPatchers();
                 if (!allSuccess)
                 {
                     Logger.Error("Mod initialization failed: Critical patch(es) failed to apply");
@@ -108,6 +113,11 @@ namespace STS2ViewedCardsStatistics
             Logger.Info("======================");
         }
 
+        private static void RegisterFrameworkPatches(ModPatcher patcher)
+        {
+            patcher.RegisterPatch<ProfileDeletePatch>();
+        }
+
         private static void RegisterMainPatches(ModPatcher patcher)
         {
             patcher.RegisterPatch<CardLibraryStatsPatch>();
@@ -116,9 +126,7 @@ namespace STS2ViewedCardsStatistics
             patcher.RegisterPatch<RelicCollectionReadyPatch>();
             patcher.RegisterPatch<PotionLabStatsPatch>();
             patcher.RegisterPatch<PotionLabReadyPatch>();
-
             patcher.RegisterPatch<SaveDataPatch>();
-
             patcher.RegisterPatch<MainMenuShowPopupPatch>();
         }
     }
