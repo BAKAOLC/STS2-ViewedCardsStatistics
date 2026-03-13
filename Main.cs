@@ -13,6 +13,7 @@ namespace STS2ViewedCardsStatistics
     {
         public static readonly Logger Logger = new(Const.ModId, LogType.Generic);
         private static readonly Dictionary<string, ModPatcher> Patchers = [];
+        private static bool _runtimeServicesInitialized;
         public static I18N I18N { get; private set; } = null!;
 
         public static bool IsModActive { get; private set; }
@@ -25,14 +26,6 @@ namespace STS2ViewedCardsStatistics
 
             try
             {
-                I18N = new(
-                    "ViewedCardsStatistics.I18N",
-                    [$"user://mod-configs/{Const.ModId}/localization"],
-                    pckFolders: ["STS2-ViewedCardsStatistics/localization"]
-                );
-
-                StatisticsManager.Initialize();
-
                 var frameworkPatcher = GetOrCreatePatcher("framework", "Framework-level patches");
                 RegisterFrameworkPatches(frameworkPatcher);
 
@@ -44,13 +37,21 @@ namespace STS2ViewedCardsStatistics
                 {
                     Logger.Error("Mod initialization failed: Critical patch(es) failed to apply");
                     Logger.Error("Mod is in a failed state and will not be active. Please check the logs for details.");
+                    LogPatcherStatus();
                     IsModActive = false;
                     return;
                 }
 
+                LogPatcherStatus();
+
+                I18N = new(
+                    "ViewedCardsStatistics.I18N",
+                    [$"user://mod-configs/{Const.ModId}/localization"],
+                    pckFolders: ["STS2-ViewedCardsStatistics/localization"]
+                );
+
                 IsModActive = true;
                 Logger.Info("Mod initialization complete - Mod is now ACTIVE");
-                LogPatcherStatus();
             }
             catch (Exception ex)
             {
@@ -58,6 +59,16 @@ namespace STS2ViewedCardsStatistics
                 Logger.Error($"Stack trace: {ex.StackTrace}");
                 IsModActive = false;
             }
+        }
+
+        public static void EnsureRuntimeServicesInitialized()
+        {
+            if (_runtimeServicesInitialized) return;
+
+            ModDataStore.Instance.Initialize();
+
+            _runtimeServicesInitialized = true;
+            Logger.Info("Runtime services initialized at safe lifecycle point");
         }
 
         private static ModPatcher GetOrCreatePatcher(string patcherName, string description)
@@ -115,6 +126,7 @@ namespace STS2ViewedCardsStatistics
 
         private static void RegisterFrameworkPatches(ModPatcher patcher)
         {
+            patcher.RegisterPatch<ProfilePathInitializedPatch>();
             patcher.RegisterPatch<ProfileDeletePatch>();
         }
 

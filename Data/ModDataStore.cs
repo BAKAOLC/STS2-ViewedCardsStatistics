@@ -111,6 +111,18 @@ namespace STS2ViewedCardsStatistics.Data
             return GetEntry(key).HadExistingData;
         }
 
+        public bool ReloadIfPathChanged()
+        {
+            EnsureInitialized();
+
+            var reloaded = false;
+            foreach (var entry in _entries.Values)
+                if (entry.ReloadIfPathChanged())
+                    reloaded = true;
+
+            return reloaded;
+        }
+
         /// <summary>
         ///     Save all data
         /// </summary>
@@ -156,7 +168,7 @@ namespace STS2ViewedCardsStatistics.Data
                 1
             );
             _migrationManager.RegisterConfig<ModSettings>(
-                1,
+                ModSettings.CurrentDataVersion,
                 1
             );
         }
@@ -195,6 +207,7 @@ namespace STS2ViewedCardsStatistics.Data
             void Load();
             void Save();
             void SaveToProfilePath(int profileId);
+            bool ReloadIfPathChanged();
         }
 
         private sealed class RegisteredDataEntry<T>(
@@ -206,6 +219,7 @@ namespace STS2ViewedCardsStatistics.Data
             : IRegisteredDataEntry where T : class, new()
         {
             private PersistentDataEntry<T>? _entry;
+            private string? _lastLoadedPath;
 
             public T Data => _entry?.Data ?? throw new InvalidOperationException(
                 $"Data entry '{key}' is not initialized.");
@@ -234,8 +248,24 @@ namespace STS2ViewedCardsStatistics.Data
                     throw new InvalidOperationException($"Data entry '{key}' is not initialized.");
 
                 var currentPath = ProfileManager.Instance.GetFilePath(fileName, Scope);
+                _lastLoadedPath = currentPath;
                 HadExistingData = FileOperations.FileExists(currentPath);
                 _entry.Load();
+            }
+
+            public bool ReloadIfPathChanged()
+            {
+                if (_entry == null)
+                    throw new InvalidOperationException($"Data entry '{key}' is not initialized.");
+
+                var currentPath = ProfileManager.Instance.GetFilePath(fileName, Scope);
+                if (string.Equals(_lastLoadedPath, currentPath, StringComparison.Ordinal))
+                    return false;
+
+                Main.Logger.Info(
+                    $"Data path changed for '{key}': '{_lastLoadedPath ?? "<none>"}' -> '{currentPath}', reloading");
+                Load();
+                return true;
             }
 
             public void Save()

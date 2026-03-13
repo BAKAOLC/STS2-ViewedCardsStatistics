@@ -13,6 +13,7 @@ namespace STS2ViewedCardsStatistics.Patches
     public class MainMenuShowPopupPatch : IPatchMethod
     {
         private static bool _initialized;
+        private static bool _popupCheckInProgress;
         private static NMainMenu? _currentMainMenu;
 
         public static string PatchId => "main_menu_show_popup";
@@ -39,6 +40,7 @@ namespace STS2ViewedCardsStatistics.Patches
                         StatisticsManager.Initialize();
 
                     ProfileManager.Instance.ProfileChanged += OnProfileChanged;
+                    DataReadyLifecycle.DataReady += OnDataReady;
                 }
 
                 TryShowPopupIfNeeded(__instance);
@@ -55,9 +57,30 @@ namespace STS2ViewedCardsStatistics.Patches
                 TryShowPopupIfNeeded(_currentMainMenu);
         }
 
+        private static void OnDataReady(int profileId, string source)
+        {
+            if (_currentMainMenu != null && GodotObject.IsInstanceValid(_currentMainMenu))
+                TryShowPopupIfNeeded(_currentMainMenu);
+        }
+
         private static void TryShowPopupIfNeeded(NMainMenu mainMenu)
         {
-            if (StatisticsManager.HasExistingData) return;
+            if (_popupCheckInProgress) return;
+
+            if (!DataReadyLifecycle.IsReady)
+            {
+                _popupCheckInProgress = true;
+                DataReadyLifecycle.RunWhenReady(_ =>
+                {
+                    _popupCheckInProgress = false;
+                    if (GodotObject.IsInstanceValid(mainMenu))
+                        TryShowPopupIfNeeded(mainMenu);
+                });
+
+                return;
+            }
+
+            if (ModDataStore.Instance.HasExistingData(ModDataStore.StatisticsKey)) return;
 
             mainMenu.ToSignal(mainMenu.GetTree(), SceneTree.SignalName.ProcessFrame)
                 .OnCompleted(FirstLoadPopup.ShowPopup);
