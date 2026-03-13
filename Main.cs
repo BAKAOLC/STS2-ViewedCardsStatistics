@@ -13,7 +13,7 @@ namespace STS2ViewedCardsStatistics
     {
         public static readonly Logger Logger = new(Const.ModId, LogType.Generic);
         private static readonly Dictionary<string, ModPatcher> Patchers = [];
-        private static bool _runtimeServicesInitialized;
+        private static bool _profileServicesInitialized;
         public static I18N I18N { get; private set; } = null!;
 
         public static bool IsModActive { get; private set; }
@@ -50,6 +50,8 @@ namespace STS2ViewedCardsStatistics
                     pckFolders: ["STS2-ViewedCardsStatistics/localization"]
                 );
 
+                ModDataStore.Instance.InitializeGlobal();
+
                 IsModActive = true;
                 Logger.Info("Mod initialization complete - Mod is now ACTIVE");
             }
@@ -61,14 +63,13 @@ namespace STS2ViewedCardsStatistics
             }
         }
 
-        public static void EnsureRuntimeServicesInitialized()
+        public static void EnsureProfileServicesInitialized()
         {
-            if (_runtimeServicesInitialized) return;
+            if (_profileServicesInitialized) return;
 
-            ModDataStore.Instance.Initialize();
+            ModDataStore.Instance.InitializeProfileScoped();
 
-            _runtimeServicesInitialized = true;
-            Logger.Info("Runtime services initialized at safe lifecycle point");
+            _profileServicesInitialized = true;
         }
 
         private static ModPatcher GetOrCreatePatcher(string patcherName, string description)

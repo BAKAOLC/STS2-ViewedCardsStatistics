@@ -23,6 +23,7 @@ namespace STS2ViewedCardsStatistics.Data
 
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly MigrationManager _migrationManager;
+        private bool _profileEventsSubscribed;
 
         private ModDataStore()
         {
@@ -41,28 +42,63 @@ namespace STS2ViewedCardsStatistics.Data
         public static ModDataStore Instance => _instance ??= new();
 
         /// <summary>
-        ///     Whether the store has been initialized
+        ///     Whether global-scoped data has been initialized
         /// </summary>
-        public bool IsInitialized { get; private set; }
+        public bool IsInitialized => IsGlobalInitialized;
+
+        public bool IsGlobalInitialized { get; private set; }
+        public bool IsProfileInitialized { get; private set; }
+        public bool HasProfileScopedEntries => _entries.Values.Any(e => e.Scope == SaveScope.Profile);
 
         /// <summary>
-        ///     Initialize the data store
+        ///     Initialize global-scoped data only (safe at early startup)
         /// </summary>
-        public void Initialize()
+        public void InitializeGlobal()
         {
-            if (IsInitialized) return;
+            if (IsGlobalInitialized) return;
 
-            ProfileManager.Instance.Initialize();
-            ProfileManager.Instance.ProfileChanged += OnProfileChanged;
-
-            foreach (var entry in _entries.Values)
+            foreach (var entry in _entries.Values.Where(e => e.Scope == SaveScope.Global))
             {
                 entry.Initialize(_jsonOptions, _migrationManager);
                 entry.Load();
             }
 
-            IsInitialized = true;
-            Main.Logger.Info("ModDataStore initialized");
+            IsGlobalInitialized = true;
+        }
+
+        /// <summary>
+        ///     Initialize profile-scoped data (must be called at safe profile path timing)
+        /// </summary>
+        public void InitializeProfileScoped()
+        {
+            if (IsProfileInitialized) return;
+
+            if (!IsGlobalInitialized)
+                InitializeGlobal();
+
+            ProfileManager.Instance.Initialize();
+            if (!_profileEventsSubscribed)
+            {
+                ProfileManager.Instance.ProfileChanged += OnProfileChanged;
+                _profileEventsSubscribed = true;
+            }
+
+            foreach (var entry in _entries.Values.Where(e => e.Scope == SaveScope.Profile))
+            {
+                entry.Initialize(_jsonOptions, _migrationManager);
+                entry.Load();
+            }
+
+            IsProfileInitialized = true;
+        }
+
+        /// <summary>
+        ///     Initialize all scopes (compatibility helper)
+        /// </summary>
+        public void Initialize()
+        {
+            InitializeGlobal();
+            InitializeProfileScoped();
         }
 
         public void Register<T>(
@@ -86,7 +122,8 @@ namespace STS2ViewedCardsStatistics.Data
 
             _entries[key] = registration;
 
-            if (!IsInitialized) return;
+            if (!IsGlobalInitialized && scope == SaveScope.Global) return;
+            if (!IsProfileInitialized && scope == SaveScope.Profile) return;
             registration.Initialize(_jsonOptions, _migrationManager);
             registration.Load();
         }
@@ -113,12 +150,15 @@ namespace STS2ViewedCardsStatistics.Data
 
         public bool ReloadIfPathChanged()
         {
-            EnsureInitialized();
+            if (!IsGlobalInitialized) return false;
 
             var reloaded = false;
             foreach (var entry in _entries.Values)
+            {
+                if (!entry.IsInitialized) continue;
                 if (entry.ReloadIfPathChanged())
                     reloaded = true;
+            }
 
             return reloaded;
         }
@@ -134,6 +174,8 @@ namespace STS2ViewedCardsStatistics.Data
 
         private void OnProfileChanged(int oldProfileId, int newProfileId)
         {
+            if (!IsProfileInitialized) return;
+
             Main.Logger.Info($"Profile changed from {oldProfileId} to {newProfileId}, handling data transition...");
 
             foreach (var entry in _entries.Values.Where(e => e.Scope == SaveScope.Profile))
@@ -175,8 +217,6 @@ namespace STS2ViewedCardsStatistics.Data
 
         private IRegisteredDataEntry GetEntry(string key)
         {
-            EnsureInitialized();
-
             return !_entries.TryGetValue(key, out var entry)
                 ? throw new KeyNotFoundException($"Data key '{key}' is not registered.")
                 : entry;
@@ -192,17 +232,12 @@ namespace STS2ViewedCardsStatistics.Data
             return typed;
         }
 
-        private void EnsureInitialized()
-        {
-            if (!IsInitialized)
-                throw new InvalidOperationException("ModDataStore is not initialized.");
-        }
-
         private interface IRegisteredDataEntry
         {
             SaveScope Scope { get; }
             Type DataType { get; }
             bool HadExistingData { get; }
+            bool IsInitialized { get; }
             void Initialize(JsonSerializerOptions jsonOptions, MigrationManager migrationManager);
             void Load();
             void Save();
@@ -227,6 +262,7 @@ namespace STS2ViewedCardsStatistics.Data
             public SaveScope Scope { get; } = scope;
             public Type DataType => typeof(T);
             public bool HadExistingData { get; private set; }
+            public bool IsInitialized => _entry != null;
 
             public void Initialize(JsonSerializerOptions jsonOptions, MigrationManager migrationManager)
             {

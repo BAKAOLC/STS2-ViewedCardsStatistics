@@ -30,18 +30,14 @@ namespace STS2ViewedCardsStatistics.Utils.Persistence
         {
             try
             {
-                Main.EnsureRuntimeServicesInitialized();
-
-                if (!ModDataStore.Instance.IsInitialized)
-                    return;
-
                 ProfileManager.Instance.RefreshCurrentProfile();
-                ModDataStore.Instance.ReloadIfPathChanged();
 
-                var profileDir = ProfileManager.Instance.GetProfileDirectory();
-                var pathReady = profileDir.Contains("modded/", StringComparison.OrdinalIgnoreCase);
-                if (!pathReady)
+                Main.EnsureProfileServicesInitialized();
+
+                if (!ModDataStore.Instance.IsProfileInitialized)
                     return;
+
+                ModDataStore.Instance.ReloadIfPathChanged();
 
                 var profileId = ProfileManager.Instance.CurrentProfileId;
                 var changed = !IsReady || ReadyProfileId != profileId;
@@ -52,7 +48,8 @@ namespace STS2ViewedCardsStatistics.Utils.Persistence
                 if (!changed)
                     return;
 
-                Main.Logger.Info($"Data ready for profile {profileId} ({source})");
+                if (ModDataStore.Instance.HasProfileScopedEntries)
+                    Main.Logger.Info($"Data ready for profile {profileId} ({source})");
                 DataReady?.Invoke(profileId, source);
 
                 if (PendingCallbacks.Count == 0) return;

@@ -35,7 +35,7 @@ namespace STS2ViewedCardsStatistics.Data
         public static ViewedStatisticsData Data =>
             ModDataStore.Instance.Get<ViewedStatisticsData>(ModDataStore.StatisticsKey);
 
-        public static bool IsInitialized => ModDataStore.Instance.IsInitialized;
+        public static bool IsInitialized => ModDataStore.Instance.IsProfileInitialized;
         public static bool HasExistingData => ModDataStore.Instance.HasExistingData(ModDataStore.StatisticsKey);
 
         public static void Initialize()

@@ -36,9 +36,6 @@ namespace STS2ViewedCardsStatistics.Patches
                 {
                     _initialized = true;
 
-                    if (!StatisticsManager.IsInitialized)
-                        StatisticsManager.Initialize();
-
                     ProfileManager.Instance.ProfileChanged += OnProfileChanged;
                     DataReadyLifecycle.DataReady += OnDataReady;
                 }
