@@ -1,7 +1,7 @@
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardLibrary;
+using STS2RitsuLib.Patching.Models;
 using STS2ViewedCardsStatistics.Data;
-using STS2ViewedCardsStatistics.Patching.Models;
 
 namespace STS2ViewedCardsStatistics.Patches
 {

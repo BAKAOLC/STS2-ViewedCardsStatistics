@@ -68,7 +68,7 @@ namespace STS2ViewedCardsStatistics.UI
         private static void OnYesPressed(NClickableControl _)
         {
             Main.Logger.Info("User chose to import run history");
-            StatisticsManager.Instance.ImportFromRunHistory();
+            StatisticsManager.ImportFromRunHistory();
             NModalContainer.Instance?.Clear();
         }
 

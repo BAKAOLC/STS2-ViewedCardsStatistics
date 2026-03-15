@@ -2,8 +2,9 @@ using Godot;
 using MegaCrit.Sts2.Core.Entities.UI;
 using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardLibrary;
+using STS2RitsuLib;
+using STS2RitsuLib.Patching.Models;
 using STS2ViewedCardsStatistics.Data;
-using STS2ViewedCardsStatistics.Patching.Models;
 
 namespace STS2ViewedCardsStatistics.Patches
 {

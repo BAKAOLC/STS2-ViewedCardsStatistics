@@ -1,11 +1,14 @@
 {
   "id": "STS2-ViewedCardsStatistics",
+  "pck_name": "STS2-ViewedCardsStatistics",
   "name": "Viewed Cards Statistics",
   "author": "OLC",
   "description": "A mod that tracks the cards, relics, potions, and monsters you've seen in the game and displays statistics about them in the compendium.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "has_pck": false,
   "has_dll": true,
   "affects_gameplay": false,
-  "dependencies": []
+  "dependencies": [
+    "STS2-RitsuLib"
+  ]
 }

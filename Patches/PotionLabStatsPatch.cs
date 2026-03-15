@@ -1,7 +1,8 @@
 using MegaCrit.Sts2.Core.Entities.UI;
 using MegaCrit.Sts2.Core.Nodes.Screens.PotionLab;
+using STS2RitsuLib;
+using STS2RitsuLib.Patching.Models;
 using STS2ViewedCardsStatistics.Data;
-using STS2ViewedCardsStatistics.Patching.Models;
 
 namespace STS2ViewedCardsStatistics.Patches
 {

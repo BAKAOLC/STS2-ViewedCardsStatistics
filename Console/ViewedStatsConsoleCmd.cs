@@ -33,7 +33,7 @@ namespace STS2ViewedCardsStatistics.Console
 
         private static CmdResult ProcessReimport()
         {
-            StatisticsManager.Instance.ClearAndReimportFromRunHistory();
+            StatisticsManager.ClearAndReimportFromRunHistory();
             return new(true, "Statistics data reimported from run history");
         }
 
@@ -63,10 +63,9 @@ namespace STS2ViewedCardsStatistics.Console
             if (args.Length <= 1)
                 return CompleteArgument(Subcommands, [], args.Length > 0 ? args[0] : "");
 
-            if (args[0].ToLowerInvariant() == "verbose")
-                return CompleteArgument(["on", "off"], [args[0]], args.Length > 1 ? args[1] : "");
-
-            return base.GetArgumentCompletions(player, args);
+            return args[0].Equals("verbose", StringComparison.InvariantCultureIgnoreCase)
+                ? CompleteArgument(["on", "off"], [args[0]], args.Length > 1 ? args[1] : "")
+                : base.GetArgumentCompletions(player, args);
         }
     }
 }

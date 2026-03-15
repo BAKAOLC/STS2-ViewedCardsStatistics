@@ -21,38 +21,29 @@ namespace STS2ViewedCardsStatistics.Data
 
         public static bool VerboseImportLogging
         {
-            get => ModDataStore.Instance.Get<ModSettings>(ModDataStore.SettingsKey).VerboseImportLogging;
+            get => ModDataStore.Get<ModSettings>(ModDataStore.SettingsKey).VerboseImportLogging;
             set
             {
-                ModDataStore.Instance.Modify<ModSettings>(ModDataStore.SettingsKey,
+                ModDataStore.Modify<ModSettings>(ModDataStore.SettingsKey,
                     s => s.VerboseImportLogging = value);
-                ModDataStore.Instance.Save(ModDataStore.SettingsKey);
+                ModDataStore.Save(ModDataStore.SettingsKey);
             }
         }
 
         public static StatisticsManager Instance => _instance ??= new();
 
-        public static ViewedStatisticsData Data =>
-            ModDataStore.Instance.Get<ViewedStatisticsData>(ModDataStore.StatisticsKey);
+        public static ViewedStatisticsData Data => ModDataStore.Get<ViewedStatisticsData>(ModDataStore.StatisticsKey);
 
-        public static bool IsInitialized => ModDataStore.Instance.IsProfileInitialized;
-        public static bool HasExistingData => ModDataStore.Instance.HasExistingData(ModDataStore.StatisticsKey);
-
-        public static void Initialize()
-        {
-            ModDataStore.Instance.Initialize();
-            MigrateDataIfNeeded();
-            Main.Logger.Info($"StatisticsManager initialized. HasExistingData: {HasExistingData}");
-        }
+        public static bool IsInitialized => ModDataStore.IsProfileInitialized;
 
         public static void CreateEmptyData()
         {
-            ModDataStore.Instance.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
+            ModDataStore.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
             Save();
             Main.Logger.Info("Created empty statistics data");
         }
 
-        public void ImportFromRunHistory()
+        public static void ImportFromRunHistory()
         {
             Main.Logger.Info("Starting import from run history...");
 
@@ -77,17 +68,17 @@ namespace STS2ViewedCardsStatistics.Data
             Main.Logger.Info($"Imported data from {importedRuns} run histories");
         }
 
-        public void ClearAndReimportFromRunHistory()
+        public static void ClearAndReimportFromRunHistory()
         {
             Main.Logger.Info("Clearing existing data and reimporting from run history...");
-            ModDataStore.Instance.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
+            ModDataStore.Modify<ViewedStatisticsData>(ModDataStore.StatisticsKey, d => d.Clear());
             ImportFromRunHistory();
         }
 
         /// <summary>
         ///     Process run history and save statistics when a run ends
         /// </summary>
-        public void ProcessAndSaveRunHistory(RunHistory history)
+        public static void ProcessAndSaveRunHistory(RunHistory history)
         {
             ProcessRunHistory(history, "current_run");
             Save();
@@ -456,7 +447,7 @@ namespace STS2ViewedCardsStatistics.Data
 
         public static void Save()
         {
-            ModDataStore.Instance.Save(ModDataStore.StatisticsKey);
+            ModDataStore.Save(ModDataStore.StatisticsKey);
         }
 
         private static void MigrateDataIfNeeded()

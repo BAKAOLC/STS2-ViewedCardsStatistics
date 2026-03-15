@@ -1,9 +1,10 @@
 using Godot;
 using MegaCrit.Sts2.Core.Nodes.Screens.MainMenu;
+using STS2RitsuLib;
+using STS2RitsuLib.Patching.Models;
+using STS2RitsuLib.Utils.Persistence;
 using STS2ViewedCardsStatistics.Data;
-using STS2ViewedCardsStatistics.Patching.Models;
 using STS2ViewedCardsStatistics.UI;
-using STS2ViewedCardsStatistics.Utils.Persistence;
 
 namespace STS2ViewedCardsStatistics.Patches
 {
@@ -13,8 +14,9 @@ namespace STS2ViewedCardsStatistics.Patches
     public class MainMenuShowPopupPatch : IPatchMethod
     {
         private static bool _initialized;
-        private static bool _popupCheckInProgress;
         private static NMainMenu? _currentMainMenu;
+        private static IDisposable? _profileDataReadySubscription;
+        private static readonly PopupLifecycleObserver LifecycleObserver = new();
 
         public static string PatchId => "main_menu_show_popup";
         public static string Description => "Show first load popup when entering main menu";
@@ -36,8 +38,7 @@ namespace STS2ViewedCardsStatistics.Patches
                 {
                     _initialized = true;
 
-                    ProfileManager.Instance.ProfileChanged += OnProfileChanged;
-                    DataReadyLifecycle.DataReady += OnDataReady;
+                    _profileDataReadySubscription = RitsuLibFramework.SubscribeLifecycle(LifecycleObserver);
                 }
 
                 TryShowPopupIfNeeded(__instance);
@@ -48,39 +49,27 @@ namespace STS2ViewedCardsStatistics.Patches
             }
         }
 
-        private static void OnProfileChanged(int oldProfileId, int newProfileId)
-        {
-            if (_currentMainMenu != null && GodotObject.IsInstanceValid(_currentMainMenu))
-                TryShowPopupIfNeeded(_currentMainMenu);
-        }
-
-        private static void OnDataReady(int profileId, string source)
-        {
-            if (_currentMainMenu != null && GodotObject.IsInstanceValid(_currentMainMenu))
-                TryShowPopupIfNeeded(_currentMainMenu);
-        }
-
         private static void TryShowPopupIfNeeded(NMainMenu mainMenu)
         {
-            if (_popupCheckInProgress) return;
-
             if (!DataReadyLifecycle.IsReady)
-            {
-                _popupCheckInProgress = true;
-                DataReadyLifecycle.RunWhenReady(_ =>
-                {
-                    _popupCheckInProgress = false;
-                    if (GodotObject.IsInstanceValid(mainMenu))
-                        TryShowPopupIfNeeded(mainMenu);
-                });
-
                 return;
-            }
 
-            if (ModDataStore.Instance.HasExistingData(ModDataStore.StatisticsKey)) return;
+            if (ModDataStore.HasExistingData(ModDataStore.StatisticsKey)) return;
 
             mainMenu.ToSignal(mainMenu.GetTree(), SceneTree.SignalName.ProcessFrame)
                 .OnCompleted(FirstLoadPopup.ShowPopup);
+        }
+
+        private sealed class PopupLifecycleObserver : ILifecycleObserver
+        {
+            public void OnEvent(IFrameworkLifecycleEvent evt)
+            {
+                if (evt is not ProfileDataReadyEvent and not ProfileDataChangedEvent)
+                    return;
+
+                if (_currentMainMenu != null && GodotObject.IsInstanceValid(_currentMainMenu))
+                    TryShowPopupIfNeeded(_currentMainMenu);
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Saves;
+using STS2RitsuLib.Patching.Models;
 using STS2ViewedCardsStatistics.Data;
-using STS2ViewedCardsStatistics.Patching.Models;
 
 namespace STS2ViewedCardsStatistics.Patches
 {
@@ -26,7 +26,7 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             try
             {
-                StatisticsManager.Instance.ProcessAndSaveRunHistory(history);
+                StatisticsManager.ProcessAndSaveRunHistory(history);
             }
             catch (Exception ex)
             {
