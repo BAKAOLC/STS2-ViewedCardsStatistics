@@ -14,6 +14,7 @@ namespace STS2ViewedCardsStatistics.Patches
     public class MainMenuShowPopupPatch : IPatchMethod
     {
         private static bool _initialized;
+        private static bool _firstLoadPopupDeferred;
         private static NMainMenu? _currentMainMenu;
         private static IDisposable? _profileDataReadySubscription;
         private static readonly PopupLifecycleObserver LifecycleObserver = new();
@@ -54,7 +55,14 @@ namespace STS2ViewedCardsStatistics.Patches
             if (!DataReadyLifecycle.IsReady)
                 return;
 
-            if (ModDataStore.HasExistingData(ModDataStore.StatisticsKey)) return;
+            if (ModDataStore.HasExistingData(ModDataStore.StatisticsKey) ||
+                ModDataStore.StatisticsPersistedFileExists())
+                return;
+
+            if (_firstLoadPopupDeferred)
+                return;
+
+            _firstLoadPopupDeferred = true;
 
             mainMenu.ToSignal(mainMenu.GetTree(), SceneTree.SignalName.ProcessFrame)
                 .OnCompleted(FirstLoadPopup.ShowPopup);
@@ -64,6 +72,9 @@ namespace STS2ViewedCardsStatistics.Patches
         {
             public void OnEvent(IFrameworkLifecycleEvent evt)
             {
+                if (evt is ProfileDataChangedEvent)
+                    _firstLoadPopupDeferred = false;
+
                 if (evt is not ProfileDataReadyEvent and not ProfileDataChangedEvent)
                     return;
 

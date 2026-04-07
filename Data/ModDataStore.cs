@@ -1,4 +1,5 @@
 using STS2RitsuLib;
+using STS2RitsuLib.Utils;
 using STS2RitsuLib.Utils.Persistence;
 using STS2ViewedCardsStatistics.Data.Models;
 
@@ -63,6 +64,19 @@ namespace STS2ViewedCardsStatistics.Data
         public static bool HasExistingData(string key)
         {
             return Store.HasExistingData(key);
+        }
+
+        /// <summary>
+        ///     Whether the statistics JSON file exists on disk for the current profile. Unlike
+        ///     <see cref="HasExistingData" />, this reflects saves made in the current session (HasExistingData only
+        ///     updates on <c>Load</c>).
+        /// </summary>
+        public static bool StatisticsPersistedFileExists()
+        {
+            if (!IsProfileInitialized) return false;
+
+            var path = ProfileManager.Instance.GetFilePath(Const.DataFileName, SaveScope.Profile, Const.ModId);
+            return FileOperations.FileExists(path);
         }
     }
 }
